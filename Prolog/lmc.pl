@@ -4,7 +4,7 @@
  * Prevede che State e NewState siano stati validi del LMC  e comporta l'esecuzione
  * dell'istruzione che porta da State a NewState.
  * Il predicato fallisce nei seguenti casi:
- * - lo stato State è un halting_state, ossia il sistema si è arrestato
+ * - lo stato State è un halted_state, ossia il sistema si è arrestato
  * - l'istruzioni è di input ma la coda di input è vuota
  * - l'istruzione corrente non è valida.
  */
@@ -21,7 +21,11 @@ one_instruction(state(Acc, Pc, Mem, In, Out, Flag),
 /* Predicato execution_loop/2 per eseguire una sequenza di istruzioni 
  *
  */
-%execution_loop(Mem, Output).
+execution_loop(State, halted_state(Acc, Pc, Mem, In, Out, Flag)).
+
+execution_loop(State, Output):-
+               one_instruction(State, NewState),
+               execution_loop(NewState, Output).
 
 
 /*execution_instruction/2 permette di eseguire le istruzioni del linguaggio macchina
