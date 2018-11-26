@@ -3,7 +3,7 @@
 % one_instruction(State, NewState) serve per simulare/eseguire un'istruzione del LMC
 % Prevede che State e NewState siano stati validi del LMC  e comporta l'esecuzione
 % dell'istruzione che porta da State a NewState.
-% Il predicato fallisce nei seguenti casi:
+% Il predicato fallisce nei seguenti casi: prova
 % - lo stato State è un halting_state, ossia il sistema si è arrestato
 % - l'istruzioni è di input ma la coda di input è vuota
 % - l'istruzione corrente non è valida.
