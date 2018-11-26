@@ -4,19 +4,13 @@
  * Prevede che State e NewState siano stati validi del LMC  e comporta l'esecuzione
  * dell'istruzione che porta da State a NewState.
  * Il predicato fallisce nei seguenti casi:
- * - lo stato State è un halted_state, ossia il sistema si è arrestato
  * - l'istruzioni è di input ma la coda di input è vuota
  * - l'istruzione corrente non è valida.
  */
 one_instruction(state(Acc, Pc, Mem, In, Out, Flag),
-                state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
+                NewState):-
         execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                               NewState).
-
-/*one_instruction(state(Acc, Pc, Mem, In, Out, Flag),
-                halted_state(NewAcc, NewPc, NewMem, NewIn, NewOut, NewFlag):-
-                  nth0().
-*/
 
 /* Predicato execution_loop/2 per eseguire una sequenza di istruzioni 
  *
@@ -34,19 +28,21 @@ execution_loop(State, Output):-
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
             nth0(Pc, Mem, Elem, R),%prelevo l'instruzione corrente dalla memoria
-            write(Elem / 100 =:= 1), !, %isolo il primo elemento per sapere la tipologia di istruzione
-		        write(X =:= Elem mod 100),
+            Num = Elem,
+            1 is Num div 100, !, %isolo il primo elemento per sapere la tipologia di istruzione
+		        X is Num mod 100,
             sum(X, Acc, NewAcc, NewFlag),
             NewPc is Pc + 1. 
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
-                      state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
+                      NewState):-
             nth0(Pc, Mem, Elem, R),%prelevo l'instruzione corrente dalla memoria
-            (Elem / 100) is 2, !,%isolo il primo elemento per sapere la tipologia di istruzione
-            var(X), nonvar(Elem), 
-            write(X is Elem mod 100),
+            Num = Elem,
+            2 is (Num div 100), !,
+            X is (Num mod 100),
             diff(X, Acc, NewAcc, NewFlag),
-            NewPc is Pc + 1. %aggiorno il Program Counter
+            NewPc is Pc + 1,
+            NewState = state(NewAcc, NewPc, Mem, In, Out, NewFlag).
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(Acc, NewPc, NewMem, In, Out, Flag)):-
@@ -54,14 +50,15 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       Elem / 100 is 3, !,
                       X is Elem mod 100,
                       store(X, Acc, Mem, NewMem),
-                      NewPC is Pc + 1.
+                      NewPc is (Pc + 1) mod 100.
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(NewAcc, NewPc, Mem, In, Out, Flag)):-
                       nth0(Pc, Mem, Elem, R),
                       Elem / 100 is 5, !,
                       Elem mod 100 is X,
-                      load(X, Acc, Mem, NewAcc).
+                      load(X, Acc, Mem, NewAcc),
+                      NewPc is (Pc + 1) mod 100.
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(Acc, NewPc, Mem, In, Out, Flag)):-
@@ -90,13 +87,15 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(Acc, Pc, Mem, NewIn, Out, Flag)):-
                       nth0(Pc, Mem, Elem, R),
                       Elem is 901, !,
-                      input(In, Acc, NewIn).
+                      input(In, Acc, NewIn),
+                      NewPc is (Pc + 1) mod 100.
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(Acc, Pc, Mem, In, NewOut)):-
                       nth0(Pc, Mem, Elem, R),
                       Elem is 902, !,
-                      output(Acc, Out, NewOut).
+                      output(Acc, Out, NewOut),
+                      NewPc is (Pc + 1) mod 100.
 
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       halted_state(Acc, Pc, Mem, In, Out, Flag)):-
@@ -107,24 +106,20 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
  * l'accumulatore e salva il risultato ,modulo 1000 nell'accumulatore.
  * In caso la somma sia maggiore di 1000 viene settato il Flag altrimenti no.
  */
-sum(Elem, Acc, NewAcc, Flag):-
+sum(Elem, Acc, NewAcc, "flag"):-
           Result is (Elem + Acc),
           Result >= 1000, !,
-          Flag = string("flag"),
           NewAcc is Result mod 1000.
 
-sum(Elem, Acc, NewAcc, Flag):-
-          NewAcc is (Elem + Acc), !,
-          Flag = string("noflag").
-
-
+sum(Elem, Acc, NewAcc, "noflag"):-
+          NewAcc is (Elem + Acc), !.
 
 %Predicato diff/4 per implementare la sottrazione tra un registro e l'accumulatore
 % e salva il risultato nell'accumulatore
-diff(Elem, Acc, NewAcc, Flag):-
+diff(Elem, Acc, NewAcc, NewFlag):-
         Result is (Elem - Acc),
         Result < 0, !,
-        Flag = string("flag"),
+        %Flag = string("flag"),
         NewAcc is Result mod 1000.
 
 diff(Elem, Acc, NewAcc, Flag):-
