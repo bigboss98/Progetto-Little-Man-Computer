@@ -1,7 +1,7 @@
 %%%% -*- Mode:Prolog -*-
 %%% File per effettuare i test della simulazione della macchina Little Man Computer
 :-use_module(library(plunit)).
-:-use_module(lmc).
+:-include('lmc.pl').
 :-begin_tests(testLmc).
 
 /*
