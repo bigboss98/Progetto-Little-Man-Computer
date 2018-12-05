@@ -21,16 +21,18 @@ one_instruction(state(Acc, Pc, Mem, In, Out, Flag), NewState):-
  *   per cui il programma termina, mostrando la coda di Output dello stato.
  * - la seconda prevede di eseguire una certa serie di istruzioni fino a quando State è di tipo state
  *   e alla fine dell'esecuzione viene ritornata la coda di output 
-*/
+ */
 execution_loop(halted_state(Acc, Pc, Mem, In, Out, Flag), Out):- !.
 
-execution_loop(state(Acc, Pc, Mem, In, Out, Flag), Out):-
-              %length(Mem, 100),
-              between(0 ,99, Pc), !,
-              write("Esecuzione numero:"), write(Pc),
-              one_instruction(state(Acc, Pc, Mem, In, Out, Flag), NewState),
-              execution_loop(NewState, Out).
+execution_loop(state(Acc, 99, Mem, In, Out, Flag), NewOut):-
+               one_instruction(state(Acc, 99, Mem, In, Out, Flag),
+                               state(NewAcc, NewPc, NewMem, NewIn, NewOut, NewFlag)).
 
+execution_loop(state(Acc, Pc, Mem, In, Out, Flag), NewOut):-
+              length(Mem, 100),
+              between(0 ,99, Pc), !,
+              one_instruction(state(Acc, Pc, Mem, In, Out, Flag), NewState),
+              execution_loop(NewState, NewOut).
 
 /* 
  * Predicato execution_instruction/2(State, NewState) esegue un'istruzione del LMC, scegliendo
@@ -42,7 +44,6 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
           nth0(Pc, Mem, Elem, R),
           recognize_instruction(Elem, 1, Rest), !,
-          write(Elem: ADD),
           nth0(Rest, Mem, Num, R1), 
           sum(Num, Acc, NewAcc, NewFlag),
           NewPc is (Pc + 1) mod 100. 

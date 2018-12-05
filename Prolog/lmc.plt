@@ -67,4 +67,6 @@ test(executionLoop):-
     Out1 = [722].
     
 
+%test(loadFiles):-
+    %lmc_load("test1.lmc", Mem).
 :-end_tests(testLmc).
