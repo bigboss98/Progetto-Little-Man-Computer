@@ -11,15 +11,15 @@
  	  lmc:one_instruction(state(2, 0, [202, 23, 45], [], [], noflag), X),
       lmc:one_instruction(state(3, 0, [101, 34], [], [], noflag), Y),
       lmc:one_instruction(state(3, 0, [104, 34, 345, 45, 999], [], [], noflag), Z),
-      X = state(43, 1, [202, 23, 45], [], [], noflag),
+      X = state(957, 1, [202, 23, 45], [], [], flag),
       Y = state(37, 1, [101, 34], [], [], noflag),
       Z = state(2, 1, [104, 34, 345, 45, 999], [], [], flag).
  
  test(memoryOperation):-
       lmc:one_instruction(state(12, 0, [301, 0], [], [], noflag), Res1),
       lmc:one_instruction(state(2, 0, [502, 34, 567], [], [], noflag), Res2),
-      %\+ lmc:one_instruction(state(4, 0, [503, 0, 45], [], [], noflag), X),%deve fallire perchè manca elemento in memoria
-      %\+ lmc:one_instruction(state(2, 0, [], [], [], noflag), Y), %deve fallire perchè la memoria è vuota
+      \+ lmc:one_instruction(state(4, 0, [503, 0, 45], [], [], noflag), X),%deve fallire perchè manca elemento in memoria
+      \+ lmc:one_instruction(state(2, 0, [], [], [], noflag), Y), %deve fallire perchè la memoria è vuota
       Res1 = state(12, 1, [301, 12], [], [], noflag),
       Res2 = state(567, 1, [502, 34, 567], [], [], noflag).
 
@@ -59,12 +59,20 @@ test(halt):-
 
 test(executionLoop):- 
     \+ lmc:execution_loop(state(0, 0, [456, 234, 123], [], [], noflag), X),
-    lmc:execution_loop(state(0, 0, [901, 315, 901, 711, 214, 316, 517, 115, 516, 603, 517, 902, 0, 1, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [41, 42], [], noflag), Out1),
-    Out1 = [722].
+    lmc:execution_loop(state(0, 0, [901, 315, 901, 711, 214, 316, 517, 115, 516, 611, 517, 902, 0, 1, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [41, 42], [], noflag), Out1),
+    Out1 = [42],
+    lmc:execution_loop(state(0, 0, [100, 100, 100, 100, 100, 100, 100, 901, 901, 112, 902, 203, 312, 902, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [56, 78], [], noflag), Out2),
+    Out2 = [390, 290].
     
 
 %test(loadFiles):-

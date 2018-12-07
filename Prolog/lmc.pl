@@ -24,15 +24,12 @@ one_instruction(state(Acc, Pc, Mem, In, Out, Flag), NewState):-
  */
 execution_loop(halted_state(Acc, Pc, Mem, In, Out, Flag), Out):- !.
 
-execution_loop(state(Acc, 99, Mem, In, Out, Flag), NewOut):-
-               one_instruction(state(Acc, 99, Mem, In, Out, Flag),
-                               state(NewAcc, NewPc, NewMem, NewIn, NewOut, NewFlag)).
 
-execution_loop(state(Acc, Pc, Mem, In, Out, Flag), NewOut):-
-              length(Mem, 100),
-              between(0 ,99, Pc), !,
-              one_instruction(state(Acc, Pc, Mem, In, Out, Flag), NewState),
-              execution_loop(NewState, NewOut).
+execution_loop(state(Acc, Pc, Mem, In, Out, Flag), FinalOut):-
+              length(Mem, 100), 
+              one_instruction(state(Acc, Pc, Mem, In, Out, Flag), 
+                              NewState), !, 
+              execution_loop(NewState, FinalOut).
 
 /* 
  * Predicato execution_instruction/2(State, NewState) esegue un'istruzione del LMC, scegliendo
@@ -40,8 +37,7 @@ execution_loop(state(Acc, Pc, Mem, In, Out, Flag), NewOut):-
  * La struttura del predicato prevede il prelevamento dell'istruzione della memoria, il riconoscimento
  * dell'istruzione e poi l'effettiva esecuzione dell'istruzione.
  */
-execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
-                      state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
+execution_instruction(state(Acc, Pc, Mem, In, Out, Flag), state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
           nth0(Pc, Mem, Elem, R),
           recognize_instruction(Elem, 1, Rest), !,
           nth0(Rest, Mem, Num, R1), 
@@ -52,7 +48,6 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       state(NewAcc, NewPc, Mem, In, Out, NewFlag)):-
           nth0(Pc, Mem, Elem, R),
           recognize_instruction(Elem, 2, Rest), !,
-          write(Elem: SUB),
           nth0(Rest, Mem, Num, R1),
           diff(Num, Acc, NewAcc, NewFlag),
           NewPc is (Pc + 1) mod 100.
@@ -106,7 +101,7 @@ execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
 execution_instruction(state(Acc, Pc, Mem, In, Out, Flag),
                       halted_state(Acc, NewPc, Mem, In, Out, Flag)):-
           nth0(Pc, Mem, Elem, R),
-          recognize_instruction(Elem, 0, Num),
+          recognize_instruction(Elem, 0, Num), !,
           NewPc is (Pc + 1) mod 100.
                       
 /*
@@ -130,12 +125,12 @@ sum(Elem, Acc, NewAcc, noflag):-
  * altrimenti il flag risulta non settato.
  */
 diff(Elem, Acc, NewAcc, flag):-
-        Result is (Elem - Acc),
+        Result is (Acc - Elem),
         Result < 0, !,
         NewAcc is Result mod 1000.
 
 diff(Elem, Acc, NewAcc, noflag):-
-        NewAcc is (Elem - Acc), !.
+        NewAcc is (Acc - Elem), !.
 
 /*
  * Predicato store/4(Elem, Acc, Mem, NewMem) per salvare nella cella di memoria di indirizzo Elem,
@@ -193,7 +188,7 @@ input(In, NewAcc, NewIn):-
  * in cui salva il valore dell'accumulatore in fondo alla coda di output.
  */
 output(Acc, Out, NewOut):-
-       append([Acc], Out, NewOut).
+       append(Out, [Acc], NewOut).
    
 /*
  * Predicato recognize_instruction(Elem, Type, Rest) per riconoscere la tipologia
@@ -211,6 +206,8 @@ recognize_instruction(Elem, Elem):-
  * Predicato replace/4(Num, Pos, NewMem) per cambiare il valore dell'elemento 
  * della lista Mem presente nella posizione Pos.
  */
+replace(_, _, [], []).
+
 replace(Num, 0, [X | Xs], [Num | Xs]):- !.
 
 replace(Num, Pos, [X | Xs], [X | Ys]):-
