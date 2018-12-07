@@ -4,7 +4,6 @@
 %%%%
 %%%% A simple LMC parser written in prolog.
 
-
 %%%% Importing the Association Lists Library
 %%%% ref: http://www.swi-prolog.org/pldoc/man?section=summary-lib-assoc
 
@@ -19,7 +18,7 @@ skip_whitespaces([], []) :- !.
 skip_whitespaces([C | Cs], MoreInput) :-
     is_white(C), !,
 	skip_whitespaces(Cs, MoreInput).
-	
+
 skip_whitespaces([C | Cs], [C | Cs]) :-
     \+ is_white(C), !.
 
@@ -97,41 +96,46 @@ parse_string_label([C | Cs], DigitsSoFar, I, DigitCodes, [C | Cs]) :-
 lmc_load(Filename, Mem) :-
     read_file_to_codes(Filename, Code, []),
     parse_label_load(Code, Labels),
-    parse_ass(Code, Mem, Labels),
+    parse_ass(Code, Mem, Labels, 0),
     print(Mem).
 
-%%% parse_ass/3
-%%% parse_ass(Code, Mem, Labels)
+%%% parse_ass/4
+%%% parse_ass(Code, Mem, Labels, N)
 %%% The goal cares of building the Memory list.
 
-parse_ass([], [], _) :- !.
+parse_ass([], [], _, _) :- !.
 
 %%% That is the case a line starts with "//"
 
-parse_ass([X, X | Code], Mem, Labels) :-
+parse_ass([X, X | Code], Mem, Labels, N) :-
     X = 47, !,
     parse_end(Code, Codes),
-    parse_ass(Codes, Mem, Labels).
+    N1 is N,
+    parse_ass(Codes, Mem, Labels, N1).
 
 %%% That is the case a line starts with "\n"
 
-parse_ass([X | Code], Mem, Labels) :-
+parse_ass([X | Code], Mem, Labels, N) :-
     X = 10, !,
     parse_end(Code, Codes),
-    parse_ass(Codes, Mem, Labels).
+    N1 is N,
+    parse_ass(Codes, Mem, Labels, N1).
 
 %%% That is the case a line starts with "tab"
 
-parse_ass([X | Code], Mem, Labels) :-
+parse_ass([X | Code], Mem, Labels, N) :-
     X = 9, !,
     parse_end(Code, Codes),
-    parse_ass(Codes, Mem, Labels).
+    N1 is N,
+    parse_ass(Codes, Mem, Labels, N1).
 
-parse_ass(Code, [Y | Mem], Labels) :-
+parse_ass(Code, [Y | Mem], Labels, N) :-
     parse_op(Code, Y, Others, Labels),!,
     parse_end(Others, Rest),
     skip_whitespaces(Rest, NewRest),
-    parse_ass(NewRest, Mem, Labels).
+    N1 is N+1,
+    N1 < 101,
+    parse_ass(NewRest, Mem, Labels, N1).
 
 %%% parse_end_line_comment/2
 %%% parse_end_line_comment(Code, Codes)
@@ -188,7 +192,7 @@ skip_end([X | Body], Body) :-
 skip_end([X | Body], Rest) :-
     X \= 10, !,
     skip_end(Body, Rest).
-	
+
 %%% parse_op/4
 %%% parse_op(Code, AssCode, Rest, Labels)
 %%% The goal reads the list of ascii codes, and however it finds a
@@ -354,7 +358,7 @@ parse_op(Code, AssCode, Rest, Labels) :-
     get_assoc(Label, Labels, _), !,
     parse_op(Ys, AssCode, Rest, Labels).
 
-	
+
 %%% parse_label_load/2
 %%% parse_label_load(Code, LabelList)
 %%% The goal reads the labels from the ASCII code
@@ -362,7 +366,7 @@ parse_op(Code, AssCode, Rest, Labels) :-
 
 parse_label_load(Code, LabelList):-
     empty_assoc(Empty),
-    Operations = ["ADD", "SUB", "STA", "LDA", "BRA", "BRZ", "BRP", "INP", 
+    Operations = ["ADD", "SUB", "STA", "LDA", "BRA", "BRZ", "BRP", "INP",
 	"OUT", "HLT", "DAT"],
     parse_label(Code, Empty, LabelList, 0, Operations).
 
