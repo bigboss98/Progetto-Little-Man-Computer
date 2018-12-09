@@ -2,6 +2,7 @@
 %%% File per effettuare i test della simulazione della macchina Little Man Computer
 :-use_module(library(plunit)).
 :-include('lmc.pl').
+:-include('parser_LMC.pl').
 :-begin_tests(testLmc).
 
 /*
@@ -75,6 +76,7 @@ test(executionLoop):-
     Out2 = [390, 290].
     
 
-%test(loadFiles):-
-    %lmc_load("test1.lmc", Mem).
+test(loadFiles):-
+    lmc:lmc_run("multiplication.lmc", [456, 678], Out),
+    write(Out).
 :-end_tests(testLmc).

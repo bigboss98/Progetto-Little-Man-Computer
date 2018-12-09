@@ -214,4 +214,12 @@ replace(Num, Pos, [X | Xs], [X | Ys]):-
         NewPos is Pos - 1,
         replace(Num, NewPos, Xs, Ys).
 
+/*
+ * Predicato lmc_run/3(File, In, Out) consente di caricare un file Assembler 
+ * del LMC nella memoria, di inserire la coda di Input e di eseguire il programma
+ * attraverso il predicato execution_loop.
+ */
+ lmc_run(File, In, Out):-
+        lmc_load(File, Mem),
+        execution_loop(state(0, 0, Mem, In, [], noflag), Out).
 %%%% End of file lmc.pl
