@@ -93,12 +93,24 @@ parse_string_label([C | Cs], DigitsSoFar, I, DigitCodes, [C | Cs]) :-
 %%% The goal reads the content of "Filename" and converts it in ASCII code
 %%% Then it starts the assembly parsing using parse_ass/2 predicate.
 
-lmc_load(Filename, Mem) :-
+lmc_load(Filename, NewMem) :-
     read_file_to_codes(Filename, Code, []),
     parse_label_load(Code, Labels),
     parse_ass(Code, Mem, Labels, 0),
-    print(Mem).
+    riempi(Mem, NewMem),
+    print(NewMem).
 
+riempi(Mem, Mem, Length) :-
+    Length = 100, !.
+
+riempi(Mem, NewMem, N) :-
+    Length is 100 - N,
+    randseq(Length, 99, L),
+    append(Mem, L, NewMem).
+
+riempi(Mem, NewMem) :-
+    length(Mem, Length),
+    riempi(Mem, NewMem, Length).
 %%% parse_ass/4
 %%% parse_ass(Code, Mem, Labels, N)
 %%% The goal cares of building the Memory list.
