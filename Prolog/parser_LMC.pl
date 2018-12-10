@@ -109,7 +109,7 @@ parse_ass([], [], _, _) :- !.
 
 parse_ass([X, X | Code], Mem, Labels, N) :-
     X = 47, !,
-    parse_end(Code, Codes),
+    skip_end(Code, Codes),
     N1 is N,
     parse_ass(Codes, Mem, Labels, N1).
 
@@ -125,15 +125,15 @@ parse_ass([X | Code], Mem, Labels, N) :-
 
 parse_ass([X | Code], Mem, Labels, N) :-
     X = 9, !,
-    parse_end(Code, Codes),
+    skip_end(Code, Codes),
     N1 is N,
     parse_ass(Codes, Mem, Labels, N1).
 
 parse_ass(Code, [Y | Mem], Labels, N) :-
-    parse_op(Code, Y, Others, Labels),!,
+    parse_op(Code, Y, Others, Labels), !,
     parse_end(Others, Rest),
     skip_whitespaces(Rest, NewRest),
-    N1 is N+1,
+    N1 is N + 1,
     N1 < 101,
     parse_ass(NewRest, Mem, Labels, N1).
 
