@@ -22,7 +22,9 @@
 						(fail-instruction)
 						(input-instruction state)))
 				  ((= (mod (nth (nth 4 state) (nth 6 state)) 100) 02) ;output
-					(output-instruction state))))
+					(output-instruction state))
+				  (T
+					(fail-instruction))))
 	((= (fetch-instruction state) 0) ;halt
 		(halt-instruction state)
 	)
